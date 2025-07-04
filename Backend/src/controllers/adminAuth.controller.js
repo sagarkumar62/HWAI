@@ -1,4 +1,5 @@
 import adminModel from "../models/admin.model.js";
+import { createAdmin } from "../services/admin.service.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -18,8 +19,8 @@ export async function registerAdmin(req, res) {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new admin
-    const user = await adminModel.create({
+    // Create new admin using service
+    const user = await createAdmin({
       username,
       email,
       password: hashedPassword,
