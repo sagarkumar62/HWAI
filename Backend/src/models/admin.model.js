@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { pass } from "three/tsl";
 
 const adminSchema = new mongoose.Schema({
   username: {
