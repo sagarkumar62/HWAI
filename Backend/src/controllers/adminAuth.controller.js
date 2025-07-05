@@ -1,4 +1,3 @@
-
 import dotenv from "dotenv";
 import adminModel from "../models/admin.model.js";
 import { createAdmin } from "../services/admin.service.js";
