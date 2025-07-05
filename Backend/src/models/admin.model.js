@@ -1,3 +1,4 @@
+import { Admin } from "mongodb";
 import mongoose from "mongoose";
 
 const adminSchema = new mongoose.Schema({
@@ -10,10 +11,15 @@ const adminSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
+        index: true,
     },
     password: {
         type: String,
         required: true,
+    },
+    role:{
+      type:String,
+      enum: ['admin']
     }
 });
 
