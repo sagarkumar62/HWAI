@@ -12,7 +12,14 @@ export async function registerAdmin(req, res) {
   try {
     const { username, email, password } = req.body;
 
-    // Parallelize admin existence check and password hash
+
+    // Restrict: Only one admin allowed
+    const adminCount = await adminModel.countDocuments({ role: "admin" });
+    if (adminCount > 0) {
+      return res.status(403).json({ message: "Only one admin allowed. Registration denied." });
+    }
+
+    // Parallelize email existence check and password hash
     const [existingAdmin, hashedPassword] = await Promise.all([
       adminModel.findOne({ email }),
       bcrypt.hash(password, 8)
@@ -60,11 +67,14 @@ export async function loginAdmin(req, res) {
   try {
     const { email, password } = req.body;
 
-    // Find admin by email and hash password in parallel (optimistic, but only use hash if admin found)
-    const adminPromise = adminModel.findOne({ email, role: "admin" }).select("+password");
-    // No need to hash password before checking admin, so only fetch admin first
-    const admin = await adminPromise;
-    // console.log("Admin found:", admin);
+
+    // Restrict: Only one admin can login (if more than one admin exists, block login)
+    const adminCount = await adminModel.countDocuments({ role: "admin" });
+    if (adminCount > 1) {
+      return res.status(403).json({ message: "Multiple admins found. Only one admin allowed. Contact support." });
+    }
+
+    const admin = await adminModel.findOne({ email, role: "admin" }).select("+password");
     if (!admin) {
       return res.status(400).json({ message: "Invalid email or password." });
     }

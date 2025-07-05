@@ -1,54 +1,61 @@
 import { createStoryService } from "../services/story.service.js";
 import storyModel from "../models/story.model.js";
 // Controller: handle upload and story creation
-export async function createStory(req, res) {
-  try {
-    const { category, title, description, image } = req.body;
-    let fileBuffer = req.file && req.file.buffer;
-    let imageUrl = image; // If image is a URL in body
+import Category from "../models/category.model.js";
 
-    // If file is uploaded, upload to ImageKit
-    if (fileBuffer) {
-      // Call service to handle upload and story creation with file
-      const story = await createStoryService({ fileBuffer, category, title, description });
-      return res.status(201).json({
-        message: "Story with image uploaded successfully",
-        story: {
-          id: story._id,
-          title: story.title,
-          category: story.category,
-          description: story.description,
-          image: story.image,
-        },
-      });
-    } else if (imageUrl) {
-      // If image is a URL, fetch the image and upload to ImageKit
-      try {
-        // Download the image from the URL as a buffer
-        const response = await fetch(imageUrl);
-        if (!response.ok) throw new Error('Failed to fetch image from URL');
-        const urlBuffer = Buffer.from(await response.arrayBuffer());
-        const story = await createStoryService({ fileBuffer: urlBuffer, category, title, description });
-        return res.status(201).json({
-          message: "Story with image URL uploaded to ImageKit successfully",
-          story: {
-            id: story._id,
-            title: story.title,
-            category: story.category,
-            description: story.description,
-            image: story.image,
-          },
-        });
-      } catch (err) {
-        return res.status(400).json({ message: "Failed to fetch or upload image from URL.", error: err.message });
-      }
-    } else {
-      return res.status(400).json({ message: "No image file or URL provided." });
+export async function createStory(req, res) {
+    try {
+        const { category: categoryInput, title, description, image } = req.body;
+        let fileBuffer = req.file && req.file.buffer;
+        let imageUrl = image; // If image is a URL in body
+
+        // 🔸 Resolve category slug to _id
+        const categoryDoc = await Category.findOne({ slug: categoryInput });
+        if (!categoryDoc) {
+            return res.status(404).json({ message: "Category not found." });
+        }
+        const category = categoryDoc._id;
+
+        if (fileBuffer) {
+            const story = await createStoryService({ fileBuffer, category, title, description });
+            return res.status(201).json({
+                message: "Story with image uploaded successfully",
+                story: {
+                    id: story._id,
+                    title: story.title,
+                    category: story.category,
+                    description: story.description,
+                    image: story.image,
+                },
+            });
+        } else if (imageUrl) {
+            try {
+                const response = await fetch(imageUrl);
+                if (!response.ok) throw new Error('Failed to fetch image from URL');
+                const urlBuffer = Buffer.from(await response.arrayBuffer());
+                const story = await createStoryService({ fileBuffer: urlBuffer, category, title, description });
+                return res.status(201).json({
+                    message: "Story with image URL uploaded to ImageKit successfully",
+                    story: {
+                        id: story._id,
+                        title: story.title,
+                        category: story.category,
+                        description: story.description,
+                        image: story.image,
+                    },
+                });
+            } catch (err) {
+                return res.status(400).json({ message: "Failed to fetch or upload image from URL.", error: err.message });
+            }
+        } else {
+            return res.status(400).json({ message: "No image file or URL provided." });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Image upload failed", error: error.message });
     }
-  } catch (error) {
-    res.status(500).json({ message: "Image upload failed", error: error.message });
-  }
 }
+
 
 
 
