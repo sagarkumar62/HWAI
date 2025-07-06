@@ -11,10 +11,10 @@ const taskSchema = new mongoose.Schema({
         type: String,
     },
     initiative: {
-        // type: mongoose.Schema.Types.ObjectId,
-        // ref: "Initiative",
-        type: String, // Assuming this is a placeholder for initiative IDs or names
-        required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Initiative",
+        // type: String, // Assuming this is a placeholder for initiative IDs or names
+        // required: true,
     },
     assignedTo: [{
     type: String,
@@ -38,10 +38,10 @@ const taskSchema = new mongoose.Schema({
         type: String,
     }],
     createdBy: {
-        // type: mongoose.Schema.Types.ObjectId,
-        // ref: "User",
-        type: String, // Assuming this is a placeholder for user IDs or usernames
-        required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        // type: String, // Assuming this is a placeholder for user IDs or usernames
+        // required: true,
     },
     comments: [commentSchema],
 }, {
@@ -52,5 +52,10 @@ taskSchema.virtual("subTasks", {
     localField: "_id",
     foreignField: "task"
 });
+
+taskSchema.index({ initiative: 1 });
+// taskSchema.index({ assignedTo: 1 });
+// taskSchema.index({ createdBy: 1 });
+taskSchema.index({ status: 1 });
 
 export default mongoose.model("Task", taskSchema);
