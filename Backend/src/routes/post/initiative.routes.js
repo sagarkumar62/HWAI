@@ -1,6 +1,5 @@
 import express from "express";
-import { isAdminOrUser } from "../../middleware/isAdminOrUser.middleware.js";
-import { isAdmin } from "../../middleware/adminAuth.middleware.js";
+import { protect } from "../../middleware/protect.middleware.js";
 import {
   createInitiative,
   getInitiatives,
@@ -8,15 +7,16 @@ import {
   updateInitiative,
   deleteInitiative
 } from "../../controllers/initiative.controller.js";
-import { verifyToken } from "../../middleware/verifyToken.middleware.js";
+
 
 const router = express.Router();
 
 
-router.post("/upload", isAdmin, createInitiative);
-router.get("/get",verifyToken, isAdminOrUser, getInitiatives);
-router.get("/get/:id",verifyToken, isAdminOrUser, getInitiativeById);
-router.put("/update/:id", isAdmin, updateInitiative);
-router.delete("/delete/:id", isAdmin, deleteInitiative);
+
+router.post("/upload", protect(["admin"]), createInitiative);
+router.get("/get", protect(["admin", "user"]), getInitiatives);
+router.get("/get/:id", protect(["admin", "user"]), getInitiativeById);
+router.put("/update/:id", protect(["admin"]), updateInitiative);
+router.delete("/delete/:id", protect(["admin"]), deleteInitiative);
 
 export default router;

@@ -1,6 +1,5 @@
 import express from "express";
-import { verifyToken } from "../../middleware/verifyToken.middleware.js";
-import { isAdminOrUser } from "../../middleware/isAdminOrUser.middleware.js";
+import { protect } from "../../middleware/protect.middleware.js";
 
 import {
     createResource,
@@ -20,7 +19,7 @@ const router = express.Router();
  */
 
 // CREATE a new resource
-router.post("/upload", verifyToken, isAdminOrUser, createResource);
+router.post("/upload", protect(["admin", "user"]), createResource);
 
 // GET all resources
 router.get("/get", getResources);
@@ -29,18 +28,18 @@ router.get("/get", getResources);
 router.get("/get/:id", getResourceById);
 
 // UPDATE a resource
-router.put("/update/:id", verifyToken, isAdminOrUser, updateResource);
+router.put("/update/:id", protect(["admin", "user"]), updateResource);
 
 // DELETE a resource
-router.delete("/delete/:id", verifyToken, isAdminOrUser, deleteResource);
+router.delete("/delete/:id", protect(["admin", "user"]), deleteResource);
 
 // DOWNLOAD a resource and increment downloads count
 router.get("/:id/download", downloadResource);
 
 // LIKE a resource
-router.post("/:id/like", verifyToken, likeResource);
+router.post("/:id/like", protect(["admin", "user"]), likeResource);
 
 // UNLIKE a resource
-router.post("/:id/unlike", verifyToken, unlikeResource);
+router.post("/:id/unlike", protect(["admin", "user"]), unlikeResource);
 
 export default router;
