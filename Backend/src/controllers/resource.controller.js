@@ -100,3 +100,25 @@ export async function deleteResource(req, res) {
     res.status(500).json({ message: "Resource deletion failed.", error: error.message });
   }
 }
+
+export async function downloadResource(req, res) {
+    try {
+        const { id } = req.params;
+        const resource = await Resource.findById(id).lean();
+        if (!resource || !resource.file) {
+            return res.status(404).json({ message: "File not found" });
+        }
+
+        // Increment download count efficiently
+        await Resource.findByIdAndUpdate(id, { $inc: { downloadsCount: 1 } });
+
+        // Set appropriate headers for file download
+        res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(resource.title || 'resource')}`);
+        res.setHeader('Content-Type', 'application/octet-stream');
+
+        // Redirect to the file URL for download (if file is a URL)
+        return res.redirect(resource.file);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}

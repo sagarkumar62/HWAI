@@ -5,7 +5,8 @@ import {
   getResources,
   getResourceById,
   updateResource,
-  deleteResource
+  deleteResource,
+  downloadResource
 } from "../../controllers/resource.controller.js";
 import { verifyToken } from "../../middleware/verifyToken.middleware.js";
 
@@ -25,5 +26,8 @@ router.put("/update:id",verifyToken, isAdminOrUser, updateResource);
 
 // DELETE a resource
 router.delete("/delete:id",verifyToken, isAdminOrUser, deleteResource);
+
+//Download a resource
+router.get('/:id/download', downloadResource);
 
 export default router;
