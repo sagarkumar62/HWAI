@@ -1,5 +1,12 @@
+
+// Inline comment schema for task comments
+const commentSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  content: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+}, { _id: false });
 import mongoose from "mongoose";
-import commentSchema from "./comment.model.js";
+
 
 const taskSchema = new mongoose.Schema({
     title: {

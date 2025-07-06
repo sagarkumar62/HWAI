@@ -1,15 +1,8 @@
 import mongoose from "mongoose";
 
 const resourceSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    description: {
-        type: String,
-        trim: true,
-    },
+    title: { type: String, required: true, trim: true },
+    description: { type: String, trim: true },
     category: {
         type: String,
         enum: ["Article", "Video", "Dataset", "Tool", "Paper", "Other"],
@@ -25,20 +18,10 @@ const resourceSchema = new mongoose.Schema({
         enum: ["URL", "File"],
         required: true,
     },
-    url: {
-        type: String,
-        trim: true,
-    },
-    file: {
-        type: String, // File URL or GridFS ObjectId
-    },
-    image: {
-        type: String, // Cover image URL (ImageKit, Cloudinary, S3)
-    },
-    tags: [{
-        type: String,
-        trim: true,
-    }],
+    url: { type: String, trim: true },
+    file: { type: String }, // File URL or GridFS ObjectId
+    image: { type: String }, // Cover image URL
+    tags: [{ type: String, trim: true }],
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -52,16 +35,13 @@ const resourceSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     }],
-    viewsCount: {
-        type: Number,
-        default: 0,
-    },
-    downloadsCount: {
-        type: Number,
-        default: 0,
-    },
+    likesCount: { type: Number, default: 0 },
+    viewsCount: { type: Number, default: 0 },
+    downloadsCount: { type: Number, default: 0 },
 }, {
     timestamps: true,
 });
+
+resourceSchema.index({ title: "text", description: "text", tags: 1 });
 
 export default mongoose.model("Resource", resourceSchema);

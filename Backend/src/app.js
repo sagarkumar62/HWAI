@@ -7,6 +7,7 @@ import userAuthroutes from './routes/user/userAuth.routes.js';
 import taskRoutes from './routes/post/task.routes.js'; 
 import intiativeRoutes from './routes/post/initiative.routes.js';
 import resourceRoutes from './routes/post/resource.routes.js';
+import researchPaperRoutes from './routes/post/reseachPaper.routes.js';
 import cookie from 'cookie-parser';
 
 const app = express();
@@ -23,5 +24,6 @@ app.use('/user', userAuthroutes);
 app.use('/task', taskRoutes);
 app.use('/initiative', intiativeRoutes);
 app.use('/resource', resourceRoutes);
+app.use('/researchpaper', researchPaperRoutes);
 
 export default app;
