@@ -6,6 +6,7 @@ import categoryRoutes from './routes/post/newsCategory.routes.js';
 import userAuthroutes from './routes/user/userAuth.routes.js';
 import taskRoutes from './routes/post/task.routes.js'; 
 import intiativeRoutes from './routes/post/initiative.routes.js';
+import resourceRoutes from './routes/post/resource.routes.js';
 import cookie from 'cookie-parser';
 
 const app = express();
@@ -21,5 +22,6 @@ app.use('/category', categoryRoutes);
 app.use('/user', userAuthroutes);
 app.use('/task', taskRoutes);
 app.use('/initiative', intiativeRoutes);
+app.use('/resource', resourceRoutes);
 
 export default app;
