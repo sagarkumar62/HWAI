@@ -32,16 +32,16 @@ router.put("/update/:id", protect(["admin"]), updatePodcast);
 router.delete("/delete/:id", protect(["admin"]), deletePodcast);
 
 // Like a podcast
-router.post("/:id/like", protect, likePodcast);
+router.post("/:id/like", protect(["admin","user"]), likePodcast);
 
 // Unlike a podcast
-router.post("/:id/unlike", protect, unlikePodcast);
+router.post("/:id/unlike", protect(["admin","user"]), unlikePodcast);
 
 // Add a comment to a podcast
-router.post("/:id/comments", protect, addComment);
+router.post("/:id/comments", protect(["admin","user"]), addComment);
 
 // Reply to a comment
-router.post("/:id/comments/reply", protect, replyToComment);
+router.post("/:id/comments/reply", protect(["admin","user"]), replyToComment);
 
 // Increment podcast views
 router.post("/:id/views", incrementViews);

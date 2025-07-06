@@ -9,6 +9,7 @@ import intiativeRoutes from './routes/post/initiative.routes.js';
 import resourceRoutes from './routes/post/resource.routes.js';
 import researchPaperRoutes from './routes/post/reseachPaper.routes.js';
 import podcastRoutes from './routes/post/podcast.routes.js';
+import caseStudiesRoutes from './routes/post/caseStudies.routes.js';
 import cookie from 'cookie-parser';
 
 const app = express();
@@ -27,6 +28,7 @@ app.use('/initiative', intiativeRoutes);
 app.use('/resource', resourceRoutes);
 app.use('/researchpaper', researchPaperRoutes);
 app.use('/podcast', podcastRoutes);
+app.use('/casestudies', caseStudiesRoutes);
 
 
 export default app;

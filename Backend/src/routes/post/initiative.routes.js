@@ -14,8 +14,8 @@ const router = express.Router();
 
 
 router.post("/upload", protect(["admin"]), createInitiative);
-router.get("/get", protect(["admin", "user"]), getInitiatives);
-router.get("/get/:id", protect(["admin", "user"]), getInitiativeById);
+router.get("/get", getInitiatives);
+router.get("/get/:id", getInitiativeById);
 router.put("/update/:id", protect(["admin"]), updateInitiative);
 router.delete("/delete/:id", protect(["admin"]), deleteInitiative);
 

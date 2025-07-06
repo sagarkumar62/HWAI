@@ -13,8 +13,8 @@ const router = express.Router();
 // All routes below require admin privileges
 
 router.post('/upload', protect(["admin"]), createCategory);
-router.get('/get', protect(["admin"]), getCategories);
-router.get('/get/:id', protect(["admin"]), getCategoryById);
+router.get('/get', getCategories);
+router.get('/get/:id', getCategoryById);
 router.put('/update/:id', protect(["admin"]), updateCategory);
 router.delete('/delete/:id', protect(["admin"]), deleteCategory);
 
