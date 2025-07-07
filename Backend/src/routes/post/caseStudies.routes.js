@@ -10,11 +10,15 @@ import {
   unlikeCaseStudy
 } from "../../controllers/caseStudies.controller.js";
 import {protect} from "../../middleware/protect.middleware.js";
+import upload from "../../middleware/upload.js";
 
 const router = express.Router();
 
 // Create a new case study
-router.post("/upload", protect(["admin"]), createCaseStudy);
+router.post("/upload", protect(["admin"]),upload.fields([
+        { name: "image", maxCount: 1 },
+         { name: "file", maxCount: 1 }
+    ]), createCaseStudy);
 
 // Get all case studies
 router.get("/get", getCaseStudies);

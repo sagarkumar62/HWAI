@@ -40,7 +40,7 @@ const podcastSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    videoUrl: {
+    video: {
       type: String,
       required: true,
     },

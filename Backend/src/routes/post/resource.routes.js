@@ -11,6 +11,7 @@ import {
     likeResource,
     unlikeResource
 } from "../../controllers/resource.controller.js";
+import upload from "../../middleware/upload.js";
 
 const router = express.Router();
 
@@ -19,7 +20,10 @@ const router = express.Router();
  */
 
 // CREATE a new resource
-router.post("/upload", protect(["admin", "user"]), createResource);
+router.post("/upload", protect(["admin", "user"]),upload.fields([
+        { name: "image", maxCount: 1 },
+        { name: "file", maxCount: 1 },
+    ]), createResource);
 
 // GET all resources
 router.get("/get", getResources);

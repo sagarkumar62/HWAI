@@ -1,180 +1,120 @@
 
-
 import VideoTutorial from "../models/videoTutorials.model.js";
 import { createVideoTutorialService } from "../services/videoTutorial.service.js";
 
-
-// CREATE a new video tutorial
-export async function createVideoTutorial(req, res) {
+// Create a new video tutorial
+export const createVideoTutorial = async (req, res) => {
   try {
-    const {
-      title,
-      description,
-      videoUrl,
-      thumbnailUrl,
-      duration,
-      tags,
-      uploadedBy,
-      isPublished,
-      category,
-      ...rest
-    } = req.body;
-
-    // File upload (for video file)
-    let videoBuffer = req.files && req.files.video ? req.files.video[0].buffer : undefined;
-    // Image upload (for thumbnail)
-    let thumbnailBuffer = req.files && req.files.thumbnail ? req.files.thumbnail[0].buffer : undefined;
-
-    // If video or thumbnail is a URL, will be handled in service
+    const videoBuffer = req.files?.video?.[0]?.buffer;
+    const thumbnailBuffer = req.files && req.files.image ? req.files.image[0].buffer : undefined;
 
     const videoTutorial = await createVideoTutorialService({
+      ...req.body,
       videoBuffer,
       thumbnailBuffer,
-      videoUrl,
-      thumbnailUrl,
-      title,
-      description,
-      duration,
-      tags,
-      uploadedBy,
-      isPublished,
-      category,
-      ...rest
     });
-    res.status(201).json({ message: "Video tutorial created successfully.", videoTutorial });
-  } catch (error) {
-    res.status(400).json({ message: "Video tutorial creation failed.", error: error.message });
-  }
-}
 
-// GET all video tutorials
-export async function getVideoTutorials(req, res) {
+    res.status(201).json(videoTutorial);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get all video tutorials
+export const getAllVideoTutorials = async (req, res) => {
   try {
-    const tutorials = await VideoTutorial.find().lean();
+    const tutorials = await VideoTutorial.find().populate("uploadedBy", "name").sort({ createdAt: -1 });
     res.status(200).json(tutorials);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch video tutorials.", error: error.message });
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
-// GET a single video tutorial by ID
-export async function getVideoTutorialById(req, res) {
+// Get a single video tutorial by ID
+export const getVideoTutorialById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const tutorial = await VideoTutorial.findById(id).lean();
-    if (!tutorial) {
-      return res.status(404).json({ message: "Video tutorial not found." });
-    }
+    const tutorial = await VideoTutorial.findById(req.params.id).populate("uploadedBy", "name");
+    if (!tutorial) return res.status(404).json({ message: "Video tutorial not found" });
     res.status(200).json(tutorial);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch video tutorial.", error: error.message });
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
-// UPDATE a video tutorial
-export async function updateVideoTutorial(req, res) {
+// Update a video tutorial
+export const updateVideoTutorial = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updateData = req.body;
-    const tutorial = await VideoTutorial.findByIdAndUpdate(id, updateData, { new: true });
-    if (!tutorial) {
-      return res.status(404).json({ message: "Video tutorial not found." });
-    }
-    res.status(200).json({ message: "Video tutorial updated successfully.", tutorial });
+    const tutorial = await VideoTutorial.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!tutorial) return res.status(404).json({ message: "Video tutorial not found" });
+    res.status(200).json(tutorial);
   } catch (error) {
-    res.status(500).json({ message: "Video tutorial update failed.", error: error.message });
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
-// DELETE a video tutorial
-export async function deleteVideoTutorial(req, res) {
+// Delete a video tutorial
+export const deleteVideoTutorial = async (req, res) => {
   try {
-    const { id } = req.params;
-    const tutorial = await VideoTutorial.findByIdAndDelete(id);
-    if (!tutorial) {
-      return res.status(404).json({ message: "Video tutorial not found." });
-    }
-    res.status(200).json({ message: "Video tutorial deleted successfully." });
+    const tutorial = await VideoTutorial.findByIdAndDelete(req.params.id);
+    if (!tutorial) return res.status(404).json({ message: "Video tutorial not found" });
+    res.status(200).json({ message: "Video tutorial deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Video tutorial deletion failed.", error: error.message });
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
-// LIKE a video tutorial
-export async function likeVideoTutorial(req, res) {
+// Like a video tutorial
+export const likeVideoTutorial = async (req, res) => {
   try {
-    const { id } = req.params;
-    const userId = req.user.id;
-
-    const tutorial = await VideoTutorial.findById(id);
-    if (!tutorial) {
-      return res.status(404).json({ message: "Video tutorial not found." });
-    }
-
-    if (!tutorial.likes.includes(userId)) {
-      tutorial.likes.push(userId);
-      tutorial.likeCount = (tutorial.likeCount || 0) + 1;
+    const tutorial = await VideoTutorial.findById(req.params.id);
+    if (!tutorial) return res.status(404).json({ message: "Video tutorial not found" });
+    if (!tutorial.likes) tutorial.likes = [];
+    if (!tutorial.likes.some((id) => id.toString() === req.user._id.toString())) {
+      tutorial.likes.push(req.user._id);
+      tutorial.likesCount = tutorial.likes.length;
       await tutorial.save();
-      return res.status(200).json({
-        message: "Video tutorial liked successfully.",
-        likeCount: tutorial.likeCount,
-        likedByUser: true
-      });
-    } else {
-      return res.status(400).json({ message: "Video tutorial already liked by this user." });
     }
+    res.status(200).json({ likesCount: tutorial.likesCount });
   } catch (error) {
-    res.status(500).json({ message: "Liking video tutorial failed.", error: error.message });
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
-// UNLIKE a video tutorial
-export async function unlikeVideoTutorial(req, res) {
+// Unlike a video tutorial
+export const unlikeVideoTutorial = async (req, res) => {
   try {
-    const { id } = req.params;
-    const userId = req.user.id;
-
-    const tutorial = await VideoTutorial.findById(id);
-    if (!tutorial) {
-      return res.status(404).json({ message: "Video tutorial not found." });
-    }
-
-    if (tutorial.likes.includes(userId)) {
-      tutorial.likes = tutorial.likes.filter(uid => uid.toString() !== userId);
-      tutorial.likeCount = Math.max(0, (tutorial.likeCount || 1) - 1);
+    const tutorial = await VideoTutorial.findById(req.params.id);
+    if (!tutorial) return res.status(404).json({ message: "Video tutorial not found" });
+    if (tutorial.likes && tutorial.likes.some((id) => id.toString() === req.user._id.toString())) {
+      tutorial.likes = tutorial.likes.filter((id) => id.toString() !== req.user._id.toString());
+      tutorial.likesCount = tutorial.likes.length;
       await tutorial.save();
-      return res.status(200).json({
-        message: "Video tutorial unliked successfully.",
-        likeCount: tutorial.likeCount,
-        likedByUser: false
-      });
-    } else {
-      return res.status(400).json({ message: "Video tutorial was not liked by this user." });
     }
+    res.status(200).json({ likesCount: tutorial.likesCount });
   } catch (error) {
-    res.status(500).json({ message: "Unliking video tutorial failed.", error: error.message });
+    res.status(500).json({ message: error.message });
   }
-}
-
-// ADD a comment to a video tutorial
-export async function addCommentToVideoTutorial(req, res) {
+};
+// Add a comment to a video tutorial
+export const addComment = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { text } = req.body;
-    const userId = req.user.id;
-
-    const tutorial = await VideoTutorial.findById(id);
-    if (!tutorial) {
-      return res.status(404).json({ message: "Video tutorial not found." });
-    }
-
-    tutorial.comments.push({ author: userId, text });
+    const { content } = req.body;
+    const tutorial = await VideoTutorial.findById(req.params.id);
+    if (!tutorial) return res.status(404).json({ message: "Video tutorial not found" });
+    const comment = {
+      content,
+      author: req.user._id,
+      videoTutorial: tutorial._id,
+      replies: [],
+    };
+    tutorial.comments.push(comment);
     await tutorial.save();
-    res.status(201).json({ message: "Comment added successfully.", comments: tutorial.comments });
+    res.status(201).json(tutorial.comments[tutorial.comments.length - 1]);
   } catch (error) {
-    res.status(500).json({ message: "Failed to add comment.", error: error.message });
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
 // DELETE a comment from a video tutorial
 export async function deleteCommentFromVideoTutorial(req, res) {

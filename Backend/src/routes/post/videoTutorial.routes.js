@@ -2,48 +2,47 @@
 import express from "express";
 import {
   createVideoTutorial,
-  getVideoTutorials,
+  getAllVideoTutorials,
   getVideoTutorialById,
   updateVideoTutorial,
   deleteVideoTutorial,
   likeVideoTutorial,
   unlikeVideoTutorial,
-  addCommentToVideoTutorial,
-  deleteCommentFromVideoTutorial
+  addComment,
+  // No replyToComment or incrementViews for videoTutorial
 } from "../../controllers/videoTutorial.controller.js";
-
-// Import authentication middleware if needed
-
 import { protect } from "../../middleware/protect.middleware.js";
+import upload from "../../middleware/upload.js";
 
 const router = express.Router();
 
+// Create a new video tutorial
+router.post("/upload", protect(["admin"]), upload.fields([
+  { name: "image", maxCount: 1 },
+  { name: "video", maxCount: 1 }
+]), createVideoTutorial);
 
-// Create a new video tutorial (admin or user)
-router.post("/upload", protect(["admin"]), createVideoTutorial);
+// Get all video tutorials
+router.get("/get", getAllVideoTutorials);
 
-// Get all video tutorials (public)
-router.get("/get", getVideoTutorials);
-
-// Get a single video tutorial by ID (public)
+// Get a single video tutorial by ID
 router.get("/get/:id", getVideoTutorialById);
 
-// Update a video tutorial (admin or user)
-router.put("/update/:id", protect(["admin"]), updateVideoTutorial);
+// Update a video tutorial
+router.put("/update/:id", protect(["admin"]), upload.fields([
+  { name: "image", maxCount: 1 },
+]), updateVideoTutorial);
 
-// Delete a video tutorial (admin or user)
-router.delete("/update/:id", protect(["admin"]), deleteVideoTutorial);
+// Delete a video tutorial
+router.delete("/delete/:id", protect(["admin"]), deleteVideoTutorial);
 
-// Like a video tutorial (any authenticated user)
+// Like a video tutorial
 router.post("/:id/like", protect(["admin", "user"]), likeVideoTutorial);
 
-// Unlike a video tutorial (any authenticated user)
+// Unlike a video tutorial
 router.post("/:id/unlike", protect(["admin", "user"]), unlikeVideoTutorial);
 
-// Add a comment to a video tutorial (any authenticated user)
-router.post("/:id/comments", protect(["admin", "user"]), addCommentToVideoTutorial);
-
-// Delete a comment from a video tutorial (any authenticated user)
-router.delete("/:id/comments/:commentId", protect(["admin", "user"]), deleteCommentFromVideoTutorial);
+// Add a comment to a video tutorial
+router.post("/:id/comments", protect(["admin", "user"]), addComment);
 
 export default router;

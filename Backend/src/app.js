@@ -10,6 +10,8 @@ import resourceRoutes from './routes/post/resource.routes.js';
 import researchPaperRoutes from './routes/post/reseachPaper.routes.js';
 import podcastRoutes from './routes/post/podcast.routes.js';
 import caseStudiesRoutes from './routes/post/caseStudies.routes.js';
+import videoTutorialRoutes from './routes/post/videoTutorial.routes.js';
+import missionRoutes from './routes/post/mission.routes.js';
 import cookie from 'cookie-parser';
 
 const app = express();
@@ -29,6 +31,8 @@ app.use('/resource', resourceRoutes);
 app.use('/researchpaper', researchPaperRoutes);
 app.use('/podcast', podcastRoutes);
 app.use('/casestudies', caseStudiesRoutes);
+app.use('/videotutorial', videoTutorialRoutes);
+app.use('/mission', missionRoutes);
 
 
 export default app;

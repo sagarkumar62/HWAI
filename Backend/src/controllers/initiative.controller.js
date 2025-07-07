@@ -4,31 +4,9 @@ import { createInitiativeService } from "../services/initiative.service.js";
 // Create a new initiative
 export async function createInitiative(req, res) {
   try {
-    let fileBuffer = req.file && req.file.buffer;
-    let bannerImageUrl = req.body.bannerImage;
-
-    // If file is uploaded, upload to ImageKit
-    if (fileBuffer) {
-      // Lazy import to avoid circular deps if any
-      const { uploadFile } = await import("../config/imagekit.js");
-      const result = await uploadFile(fileBuffer);
-      bannerImageUrl = result.url;
-    } else if (bannerImageUrl) {
-      // If bannerImage is a URL, fetch and upload to ImageKit
-      try {
-        const response = await fetch(bannerImageUrl);
-        if (!response.ok) throw new Error('Failed to fetch banner image from URL');
-        const urlBuffer = Buffer.from(await response.arrayBuffer());
-        const { uploadFile } = await import("../config/imagekit.js");
-        const result = await uploadFile(urlBuffer);
-        bannerImageUrl = result.url;
-      } catch (err) {
-        return res.status(400).json({ message: "Failed to fetch or upload banner image from URL.", error: err.message });
-      }
-    }
-
-    // Pass all fields, but override bannerImage with uploaded url if present
-    const initiative = await createInitiativeService({ ...req.body, bannerImage: bannerImageUrl });
+    const fileBuffer = req.file && req.file.buffer;
+    // Pass all fields and fileBuffer to the service
+    const initiative = await createInitiativeService({ ...req.body, fileBuffer });
     res.status(201).json({ message: "Initiative created successfully.", initiative });
   } catch (error) {
     res.status(500).json({ message: "Initiative creation failed.", error: error.message });

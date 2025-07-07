@@ -11,11 +11,15 @@ import {
   unlikeResearchPaper
 } from "../../controllers/researchPaper.controller.js";
 import { protect } from "../../middleware/protect.middleware.js";
+import upload from "../../middleware/upload.js";
 
 const router = express.Router();
 
 // CREATE a new research paper
-router.post("/upload", protect(["admin", "user"]), createResearchPaper);
+router.post("/upload", protect(["admin", "user"]),upload.fields([
+        { name: "image", maxCount: 1 },
+        { name: "file", maxCount: 1 },
+    ]), createResearchPaper);
 
 // GET all research papers
 router.get("/get", getResearchPapers);
@@ -24,7 +28,10 @@ router.get("/get", getResearchPapers);
 router.get("/get/:id", getResearchPaperByIdWithViews);
 
 // UPDATE a research paper
-router.put("/update/:id", protect(["admin", "user"]), updateResearchPaper);
+router.put("/update/:id", protect(["admin", "user"]),upload.fields([
+        { name: "image", maxCount: 1 },
+        { name: "file", maxCount: 1 },
+    ]), updateResearchPaper);
 
 // DELETE a research paper
 router.delete("/delete/:id", protect(["admin", "user"]), deleteResearchPaper);

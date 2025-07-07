@@ -1,23 +1,34 @@
 import mongoose from "mongoose";
 
-// Embedded Comment Schema
+// Inline Comment Schema for VideoTutorial (like Podcast)
 const commentSchema = new mongoose.Schema(
   {
+    content: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    text: {
-      type: String,
+    videoTutorial: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "VideoTutorial",
       required: true,
-      trim: true,
     },
+    replies: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
   },
   { timestamps: true }
 );
 
-// Main Video Tutorial Schema
+// VideoTutorial Schema (like Podcast)
 const videoTutorialSchema = new mongoose.Schema(
   {
     title: {
@@ -29,7 +40,7 @@ const videoTutorialSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    videoUrl: {
+    video: {
       type: String,
       required: true,
     },
@@ -37,7 +48,7 @@ const videoTutorialSchema = new mongoose.Schema(
       type: String,
     },
     duration: {
-      type: Number, // store in seconds
+      type: Number,
     },
     tags: [
       {
@@ -56,24 +67,28 @@ const videoTutorialSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    likeCount: {
+    likesCount: {
       type: Number,
       default: 0,
     },
-    comments: [commentSchema], // embedded comments
+    viewsCount: {
+      type: Number,
+      default: 0,
+    },
+    comments: [commentSchema],
     isPublished: {
       type: Boolean,
-      default: true,
+      default: false,
+    },
+    publishedAt: {
+      type: Date,
     },
     category: {
       type: String,
-      enum: ["Web Development", "AI", "Data Science", "DSA", "Career", "Other"],
-      default: "Other",
+      trim: true,
     },
   },
   { timestamps: true }
 );
 
-const VideoTutorial = mongoose.model("VideoTutorial", videoTutorialSchema);
-
-export default VideoTutorial;
+export default mongoose.model("VideoTutorial", videoTutorialSchema);

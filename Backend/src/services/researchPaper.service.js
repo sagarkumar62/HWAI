@@ -1,11 +1,13 @@
 import ResearchPaper from "../models/researchPaper.model.js";
-import { uploadFile } from "../config/imagekit.js"; // Uncomment and implement if you want file uploads
+import { uploadFile } from "../config/imagekit.js";
+import { uploadPdfFile } from "../config/imagekit.js"; // Import PDF upload function
 
 // Service: upload file/image and create research paper
 export async function createResearchPaperService({
   fileBuffer, // for PDF upload
   imageBuffer, // for cover image upload
   url, // PDF URL (if type is URL)
+  file,
   image, // cover image URL (optional)
   title,
   abstract,
@@ -23,7 +25,7 @@ export async function createResearchPaperService({
     throw new Error("title, abstract, and createdBy are required");
   }
 
-  let finalFileUrl = url;
+  let finalFileUrl = file;
   let finalImageUrl = image;
 
   // Use Promise.all to parallelize file and image upload if both are present
@@ -31,17 +33,11 @@ export async function createResearchPaperService({
   let imageUploadPromise = null;
 
 
-  // Handle file upload (for PDF)
+  // Handle file upload (for PDF) - only accept fileBuffer, do not accept URL
   if (fileBuffer) {
-    fileUploadPromise = uploadFile(fileBuffer).then(result => result.url);
+    fileUploadPromise = uploadPdfFile(fileBuffer).then(result => result.url);
   } else if (url) {
-    fileUploadPromise = (async () => {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch file from URL');
-      const urlBuffer = Buffer.from(await response.arrayBuffer());
-      const result = await uploadFile(urlBuffer);
-      return result.url;
-    })();
+    throw new Error("PDF upload via URL is not allowed. Please upload a PDF file.");
   }
 
 

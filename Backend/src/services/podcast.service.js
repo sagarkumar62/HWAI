@@ -1,12 +1,11 @@
 import Podcast from "../models/podcast.model.js";
-import { uploadFile } from "../config/imagekit.js"; // Uncomment and implement if you want file uploads
+import { uploadFile, uploadVideoFile } from "../config/imagekit.js"; 
 
-// Service: upload file/image and create podcast
 export async function createPodcastService({
-  videoBuffer, // for video upload
-  thumbnailBuffer, // for thumbnail upload
-  videoUrl, // video URL (if type is URL)
-  thumbnailUrl, // thumbnail URL (optional)
+  videoBuffer,
+  thumbnailBuffer,
+  video, // URL if provided
+  thumbnailUrl,
   title,
   description,
   duration,
@@ -14,61 +13,40 @@ export async function createPodcastService({
   uploadedBy,
   ...rest
 }) {
-  if (!title || !videoUrl || !uploadedBy) {
-    throw new Error("title, videoUrl, and uploadedBy are required");
+  if (!title || !uploadedBy || (!videoBuffer && !video)) {
+    throw new Error("title, uploadedBy, and video file or URL are required");
   }
 
-  let finalVideoUrl = videoUrl;
+  let finalVideoUrl = video;
   let finalThumbnailUrl = thumbnailUrl;
 
-  let videoUploadPromise = null;
-  let thumbnailUploadPromise = null;
+  const uploadPromises = [];
 
-  // Handle video upload
   if (videoBuffer) {
-    videoUploadPromise = uploadFile(videoBuffer).then(result => result.url);
-  } else if (videoUrl) {
-    videoUploadPromise = (async () => {
-      const response = await fetch(videoUrl);
-      if (!response.ok) throw new Error('Failed to fetch video from URL');
-      const urlBuffer = Buffer.from(await response.arrayBuffer());
-      const result = await uploadFile(urlBuffer);
-      return result.url;
-    })();
+    uploadPromises.push(
+      uploadVideoFile(videoBuffer).then(res => { finalVideoUrl = res.url; })
+    );
   }
 
-  // Handle thumbnail upload (optional)
   if (thumbnailBuffer) {
-    thumbnailUploadPromise = uploadFile(thumbnailBuffer).then(result => result.url);
-  } else if (thumbnailUrl) {
-    thumbnailUploadPromise = (async () => {
-      const response = await fetch(thumbnailUrl);
-      if (!response.ok) throw new Error('Failed to fetch thumbnail from URL');
-      const urlBuffer = Buffer.from(await response.arrayBuffer());
-      const result = await uploadFile(urlBuffer);
-      return result.url;
-    })();
+    uploadPromises.push(
+      uploadFile(thumbnailBuffer).then(res => { finalThumbnailUrl = res.url; })
+    );
   }
 
-  // Await uploads in parallel if needed
-  if (videoUploadPromise || thumbnailUploadPromise) {
-    const [videoUploadedUrl, thumbnailUploadedUrl] = await Promise.all([
-      videoUploadPromise,
-      thumbnailUploadPromise
-    ]);
-    if (videoUploadedUrl) finalVideoUrl = videoUploadedUrl;
-    if (thumbnailUploadedUrl) finalThumbnailUrl = thumbnailUploadedUrl;
-  }
+  await Promise.all(uploadPromises);
 
   const podcast = new Podcast({
     title,
     description,
-    videoUrl: finalVideoUrl,
+    video: finalVideoUrl, // use consistent field
     thumbnailUrl: finalThumbnailUrl,
     duration,
     tags,
     uploadedBy,
     ...rest
   });
+
   return await podcast.save();
 }
+

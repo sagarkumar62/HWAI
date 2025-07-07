@@ -7,14 +7,18 @@ import mongoose from "mongoose";
 // Create a new podcast
 export const createPodcast = async (req, res) => {
   try {
-    // You may need to adjust this if handling file uploads via multipart/form-data
+    const videoBuffer = req.files?.video?.[0]?.buffer;
+    const thumbnailBuffer = req.files && req.files.image ? req.files.image[0].buffer : undefined;
+
     const podcast = await createPodcastService({
       ...req.body,
-      // videoBuffer: req.file?.buffer, // Uncomment if using multer for file upload
-      // thumbnailBuffer: req.file?.buffer, // Uncomment if using multer for thumbnail upload
+      videoBuffer,
+      thumbnailBuffer,
     });
+
     res.status(201).json(podcast);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };

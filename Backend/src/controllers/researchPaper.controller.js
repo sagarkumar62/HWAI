@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import ResearchPaper from "../models/researchPaper.model.js";
 import { createResearchPaperService } from "../services/researchPaper.service.js";
 
@@ -12,6 +13,7 @@ export async function createResearchPaper(req, res) {
       journal,
       doi,
       url,
+      file,
       image,
       tags,
       category,
@@ -31,6 +33,7 @@ export async function createResearchPaper(req, res) {
       fileBuffer,
       imageBuffer,
       url,
+      file,
       image,
       title,
       abstract,
