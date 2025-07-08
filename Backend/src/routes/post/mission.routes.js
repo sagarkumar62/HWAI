@@ -15,10 +15,10 @@ const router = express.Router();
 router.post("/upload", protect(["admin"]), upload.single("image"), createMission);
 
 // Get all missions (admin and user)
-router.get("/get", protect(["admin", "user"]), getAllMissions);
+router.get("/get", getAllMissions);
 
 // Get a single mission by ID (admin and user)
-router.get("/get/:id", protect(["admin", "user"]), getMissionById);
+router.get("/get/:id",  getMissionById);
 
 // Update a mission (admin only, with image upload)
 router.put("/update/:id", protect(["admin"]), upload.single("image"), updateMission);
