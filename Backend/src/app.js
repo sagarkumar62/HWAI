@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import adminAuthroutes from './routes/admin/adminAuth.routes.js';
 import storyPostRoutes from './routes/post/storyPost.routes.js';
 import subStoryPostRoutes from './routes/post/substoryPost.routes.js';
@@ -15,6 +16,7 @@ import missionRoutes from './routes/post/mission.routes.js';
 import cookie from 'cookie-parser';
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 app.use(cookie());
